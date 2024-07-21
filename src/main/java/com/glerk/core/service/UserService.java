@@ -1,6 +1,5 @@
 package com.glerk.core.service;
 
-import com.glerk.core.dto.IdTokenRequestDto;
 import com.glerk.core.entity.User;
 import com.glerk.core.dto.UserDto;
 import com.glerk.core.config.security.JWTUtils;
@@ -12,7 +11,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +21,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 @Service
-@Slf4j
+@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
@@ -48,41 +46,35 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.INVALID_TOKEN));
     }
 
-    @Transactional
-    public String signupOAuthGoogle(IdTokenRequestDto requestBody) {
-        UserDto googleInfoDto = verifyIDToken(requestBody.getIdToken());
-
-        if (googleInfoDto == null) {
-            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
-        }
-
-        User user = getOrCreateUser(googleInfoDto);
-        return jwtUtils.createToken(user);
-    }
-
-    @Transactional
-    public String loginOAuthGoogle(IdTokenRequestDto requestBody) {
-        UserDto googleInfoDto = verifyIDToken(requestBody.getIdToken());
+    public String loginOAuthGoogle(String idToken) {
+        UserDto googleInfoDto = verifyIDToken(idToken);
 
         if (googleInfoDto == null) {
             throw new BusinessException(ErrorCode.GOOGLE_USER_NOT_FOUND);
         }
 
-        User user = findUserByEmail(googleInfoDto.getEmail()).orElse(null);
-        if (user == null) {
-            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
-        }
-
+        User user = findUserByEmail(googleInfoDto.getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         return jwtUtils.createToken(user);
     }
 
-    private User getOrCreateUser(UserDto googleInfoDto) {
+    public String signupOAuthGoogle(String idToken) {
+        UserDto googleInfoDto = verifyIDToken(idToken);
+
+        if (googleInfoDto == null) {
+            throw new BusinessException(ErrorCode.GOOGLE_USER_NOT_FOUND);
+        }
+
         Optional<User> optionalUser = this.findUserByEmail(googleInfoDto.getEmail());
 
         if (optionalUser.isPresent()) {
-            return optionalUser.get();
+            throw new BusinessException(ErrorCode.USER_ALREADY_EXIST);
         }
 
+        User user = createUser(googleInfoDto);
+        return jwtUtils.createToken(user);
+    }
+
+    private User createUser(UserDto googleInfoDto) {
         User user = new User();
         user.setEmail(googleInfoDto.getEmail());
         user.setUsername(googleInfoDto.getUsername());
