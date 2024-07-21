@@ -43,8 +43,9 @@ public class UserService {
                 .build();
     }
 
-    public User getUser(Long id) {
-        return userRepository.findById(id).orElse(null);
+    @Transactional(readOnly = true)
+    public User findUser(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.INVALID_TOKEN));
     }
 
     @Transactional

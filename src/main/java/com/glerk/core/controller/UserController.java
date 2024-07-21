@@ -15,14 +15,14 @@ import static com.glerk.core.dto.UserDto.convertToDto;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/oauth")
+@RequestMapping("/v1/user")
 public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/user/info")
+    @GetMapping
     public ResponseEntity<UserDto> getUserInfo(Principal principal) {
-        User user = userService.getUser(Long.valueOf(principal.getName()));
+        User user = userService.findUser(Long.valueOf(principal.getName()));
         return ResponseEntity.ok().body(convertToDto(user));
     }
 }
