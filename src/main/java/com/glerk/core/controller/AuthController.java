@@ -3,7 +3,6 @@ package com.glerk.core.controller;
 import com.glerk.core.dto.IdTokenRequestDto;
 import com.glerk.core.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,20 +19,12 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<Void> signupWithGoogleOauth2(@RequestBody IdTokenRequestDto requestBody) {
         String authToken = userService.signupOAuthGoogle(requestBody.getIdToken());
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + authToken);
-
-        return ResponseEntity.ok().headers(headers).build();
+        return ResponseEntity.ok().header("Authorization", "Bearer " + authToken).build();
     }
 
     @PostMapping("/login")
     public ResponseEntity<Void> loginWithGoogleOauth2(@RequestBody IdTokenRequestDto requestBody) {
         String authToken = userService.loginOAuthGoogle(requestBody.getIdToken());
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + authToken);
-
-        return ResponseEntity.ok().headers(headers).build();
+        return ResponseEntity.ok().header("Authorization", "Bearer " + authToken).build();
     }
 }
