@@ -27,6 +27,8 @@ public class GroupRepositoryImpl implements GroupRepositoryCustom {
             queryBuilder.append(" AND t.name LIKE :templateName");
         }
 
+        queryBuilder.append(" ORDER BY g.createdAt, t.createdAt");
+
         TypedQuery<Group> query = em.createQuery(queryBuilder.toString(), Group.class);
         query.setParameter("userId", userId);
 
