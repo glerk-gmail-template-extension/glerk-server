@@ -80,12 +80,12 @@ public class TemplateService {
             templateDto.getRecipients().forEach(email -> template.addEmail(email, EmailType.RECIPIENT));
         }
 
-        if (templateDto.getCc() != null) {
-            templateDto.getCc().forEach(email -> template.addEmail(email, EmailType.CC));
+        if (templateDto.getCcList() != null) {
+            templateDto.getCcList().forEach(email -> template.addEmail(email, EmailType.CC));
         }
 
-        if (templateDto.getBcc() != null) {
-            templateDto.getBcc().forEach(email -> template.addEmail(email, EmailType.BCC));
+        if (templateDto.getBccList() != null) {
+            templateDto.getBccList().forEach(email -> template.addEmail(email, EmailType.BCC));
         }
     }
 

@@ -38,10 +38,10 @@ public class TemplateFormDto {
     private List<@Email(message = "수신자의 이메일 형식이 잘못되었습니다.") String> recipients;
 
     @Valid
-    private List<@Email(message = "참조 이메일 형식이 잘못되었습니다.") String> cc;
+    private List<@Email(message = "참조 이메일 형식이 잘못되었습니다.") String> ccList;
 
     @Valid
-    private List<@Email(message = "비밀 참조 이메일 형식이 잘못되었습니다.") String> bcc;
+    private List<@Email(message = "비밀 참조 이메일 형식이 잘못되었습니다.") String> bccList;
 
     private List<String> labels;
 
@@ -70,12 +70,12 @@ public class TemplateFormDto {
                 .map(TemplateEmail::getEmail)
                 .collect(Collectors.toList()));
 
-        dto.setCc(template.getEmails().stream()
+        dto.setCcList(template.getEmails().stream()
                 .filter(email -> email.getType() == EmailType.CC)
                 .map(TemplateEmail::getEmail)
                 .collect(Collectors.toList()));
 
-        dto.setBcc(template.getEmails().stream()
+        dto.setBccList(template.getEmails().stream()
                 .filter(email -> email.getType() == EmailType.BCC)
                 .map(TemplateEmail::getEmail)
                 .collect(Collectors.toList()));
