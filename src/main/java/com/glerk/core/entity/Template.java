@@ -22,6 +22,8 @@ public class Template extends AuditableEntity {
     private String name;
     private String hashtag;
     private String subject;
+
+    @Column(columnDefinition = "TEXT")
     private String body;
 
     @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true)
