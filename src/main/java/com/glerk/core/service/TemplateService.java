@@ -1,5 +1,6 @@
 package com.glerk.core.service;
 
+import com.glerk.core.dto.HashtagDto;
 import com.glerk.core.dto.TemplateFormDto;
 import com.glerk.core.entity.EmailType;
 import com.glerk.core.entity.Group;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -29,6 +31,14 @@ public class TemplateService {
     public Template getTemplateByIdAndUserId(Long templateId, Long userId) {
         return templateRepository.findByIdAndCreatedBy(templateId, userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.TEMPLATE_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
+    public List<HashtagDto> getTemplatesByHashtagAndUserId(String hashtag, Long userId) {
+        return templateRepository.findByHashtagContainingAndCreatedBy(hashtag, userId)
+                .stream()
+                .map(HashtagDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
     public Template createTemplate(TemplateFormDto templateDto, Long userId) {

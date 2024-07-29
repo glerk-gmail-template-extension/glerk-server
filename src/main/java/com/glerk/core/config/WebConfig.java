@@ -15,6 +15,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${client.url}")
     String CLIENT_URL;
 
+    @Value("${extension.url}")
+    String EXTENSION_URL;
+
     private final CurrentUserArgumentResolver currentUserArgumentResolver;
 
     public WebConfig(CurrentUserArgumentResolver currentUserArgumentResolver) {
@@ -24,7 +27,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins(CLIENT_URL)
+                .allowedOrigins(CLIENT_URL, EXTENSION_URL)
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);

@@ -1,6 +1,7 @@
 package com.glerk.core.controller;
 
 import com.glerk.core.config.User.CurrentUser;
+import com.glerk.core.dto.HashtagDto;
 import com.glerk.core.dto.TemplateFormDto;
 import com.glerk.core.entity.Template;
 import com.glerk.core.entity.User;
@@ -52,5 +53,11 @@ public class TemplateController {
     public ResponseEntity<List<Long>> deleteTemplates(@RequestBody List<Long> templateIds, @CurrentUser User user) {
         templateService.deleteTemplates(templateIds, user.getId());
         return ResponseEntity.ok().body(templateIds);
+    }
+
+    @GetMapping("/hashtag/{hashtag}")
+    public ResponseEntity<List<HashtagDto>> getTemplateByHashtag(@PathVariable String hashtag, @CurrentUser User user) {
+        List<HashtagDto> hashtagDtos = templateService.getTemplatesByHashtagAndUserId(hashtag, user.getId());
+        return ResponseEntity.ok().body(hashtagDtos);
     }
 }
