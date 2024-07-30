@@ -8,7 +8,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class TemplateEmail {
+public class TemplateEmail extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
