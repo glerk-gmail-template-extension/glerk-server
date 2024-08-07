@@ -4,10 +4,9 @@ import com.glerk.core.common.LevenshteinDistance;
 import com.glerk.core.common.Tokenizer;
 import com.glerk.core.common.Trie;
 import com.glerk.core.dto.AutocompleteEmailDto;
-import com.glerk.core.service.AutocompleteService;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -15,11 +14,10 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
+@ActiveProfiles("test")
 @SpringBootTest
 class GlerkApplicationTests {
-
-    @Autowired
-    AutocompleteService autocompleteService;
 
     @Test
     void printEmailAutocomplete() {
