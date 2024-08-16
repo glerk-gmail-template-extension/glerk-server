@@ -9,8 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.glerk.core.common.Tokenizer.emailTokenize;
-
 @Service
 @Transactional(readOnly = true)
 public class AutocompleteService {
@@ -27,12 +25,7 @@ public class AutocompleteService {
         Trie trie = new Trie();
 
         for (AutocompleteEmailDto templateEmailDto : templateEmailDtos) {
-            trie.insertPrefix(templateEmailDto.getEmail(), templateEmailDto.getUpdatedAt());
-
-            List<String> emailTokenList = emailTokenize(templateEmailDto.getEmail());
-            for (String emailToken : emailTokenList.subList(1, emailTokenList.size())) {
-                trie.insertSuffix(emailToken, templateEmailDto.getEmail(), templateEmailDto.getUpdatedAt());
-            }
+            trie.insert(templateEmailDto.getEmail(), templateEmailDto.getUpdatedAt());
         }
 
         return trie.query(query);

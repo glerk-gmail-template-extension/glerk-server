@@ -10,8 +10,10 @@ import java.util.List;
 
 public interface TemplateEmailRepository extends JpaRepository<TemplateEmail, Long> {
 
-    @Query("SELECT new com.glerk.core.dto.AutocompleteEmailDto(te.email, te.updatedAt) " +
-            "FROM TemplateEmail te WHERE te.createdBy = :userId " +
-            "ORDER BY te.updatedAt DESC")
+    @Query("SELECT DISTINCT new com.glerk.core.dto.AutocompleteEmailDto(te.email, MAX(te.updatedAt)) " +
+            "FROM TemplateEmail te " +
+            "WHERE te.createdBy = :userId " +
+            "GROUP BY te.email " +
+            "ORDER BY MAX(te.updatedAt) DESC")
     List<AutocompleteEmailDto> findDistinctEmailsByCreatedByOrderByUpdatedAtDesc(@Param("userId") Long userId);
 }

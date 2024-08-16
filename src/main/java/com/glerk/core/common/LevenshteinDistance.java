@@ -1,34 +1,24 @@
 package com.glerk.core.common;
 
 public class LevenshteinDistance {
+    public static int compute(String s1, String s2) {
+        int[][] dp = new int[s1.length() + 1][s2.length() + 1];
 
-    public static int levDistance(String text1, String text2) {
-        int rowLen = text1.length() + 1;
-        int colLen = text2.length() + 1;
-        int[][] mat = new int[rowLen][colLen];
-
-        for (int i = 0; i < rowLen; i++) {
-            mat[i][0] = i;
-        }
-
-        for (int j = 0; j < colLen; j++) {
-            mat[0][j] = j;
-        }
-
-        for (int i = 1; i < rowLen; i++) {
-            for (int j = 1; j < colLen; j++) {
-                char a = text1.charAt(i - 1);
-                char b = text2.charAt(j - 1);
-
-                int match = (a == b) ? 0 : 1;
-                int replace = mat[i - 1][j - 1] + match;
-                int insert = mat[i - 1][j] + 1;
-                int delete = mat[i][j - 1] + 1;
-
-                mat[i][j] = Math.min(replace, Math.min(insert, delete));
+        for (int i = 0; i <= s1.length(); i++) {
+            for (int j = 0; j <= s2.length(); j++) {
+                if (i == 0) {
+                    dp[i][j] = j;
+                } else if (j == 0) {
+                    dp[i][j] = i;
+                } else {
+                    dp[i][j] = Math.min(
+                            dp[i - 1][j - 1] + (s1.charAt(i - 1) == s2.charAt(j - 1) ? 0 : 1),
+                            Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1)
+                    );
+                }
             }
         }
 
-        return mat[rowLen - 1][colLen - 1];
+        return dp[s1.length()][s2.length()];
     }
 }

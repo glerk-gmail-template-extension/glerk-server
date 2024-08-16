@@ -1,10 +1,13 @@
 package com.glerk.core;
 
-import com.glerk.core.common.LevenshteinDistance;
-import com.glerk.core.common.Tokenizer;
-import com.glerk.core.common.Trie;
 import com.glerk.core.dto.AutocompleteEmailDto;
+import com.glerk.core.entity.User;
+import com.glerk.core.repository.TemplateEmailRepository;
+import com.glerk.core.service.AutocompleteService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -13,68 +16,65 @@ import java.time.Month;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 
 @ActiveProfiles("test")
 @SpringBootTest
 class GlerkApplicationTests {
 
-    @Test
-    void printEmailAutocomplete() {
-        Trie trie = new Trie();
-        Map<String, LocalDateTime> emails = new HashMap<>();
+    @Mock
+    private TemplateEmailRepository templateEmailRepository;
 
-        emails.put("jieun@example.com", LocalDateTime.of(2024, Month.JULY, 30, 17, 0));
-        emails.put("jiji@test.com", LocalDateTime.of(2024, Month.JULY, 29, 0, 0));
-        emails.put("eji@website.org", LocalDateTime.of(2024, Month.JULY, 30, 17, 0));
-        emails.put("toy3045@website.org", LocalDateTime.of(2024, Month.MAY, 30, 17, 0));
-        emails.put("test@ji.org", LocalDateTime.of(2024, Month.APRIL, 1, 4, 0));
-        emails.put("hojin@domain.com", LocalDateTime.of(2024, Month.APRIL, 1, 14, 0));
+    private AutocompleteService autocompleteService;
+    private User mockUser;
 
-        for (String email : emails.keySet()) {
-            LocalDateTime time = emails.get(email);
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        mockUser = new User();
+        mockUser.setId(1L);
 
-            trie.insertPrefix(email, time);
-
-            List<String> tokenList = Tokenizer.emailTokenize(email);
-            for (String emailToken : tokenList.subList(1, tokenList.size())) {
-                trie.insertSuffix(emailToken, email, time);
-            }
-        }
-
-        List<AutocompleteEmailDto> emailDtos = trie.query("ji");
-
-        assertNotNull(emailDtos);
-        assertEquals(4, emailDtos.size());
-
-        List<String> expectedEmails = Arrays.asList(
-                "jieun@example.com",
-                "jiji@test.com",
-                "eji@website.org",
-                "hojin@domain.com"
+        List<AutocompleteEmailDto> mockEmails = Arrays.asList(
+                new AutocompleteEmailDto("jieun@example.com", LocalDateTime.of(2024, Month.JULY, 30, 17, 0)),
+                new AutocompleteEmailDto("jiji@test.com", LocalDateTime.of(2024, Month.JULY, 29, 0, 0)),
+                new AutocompleteEmailDto("eji@website.org", LocalDateTime.of(2024, Month.AUGUST, 2, 17, 0)),
+                new AutocompleteEmailDto("toy3045@website.org", LocalDateTime.of(2024, Month.MAY, 30, 17, 0)),
+                new AutocompleteEmailDto("test@ji.org", LocalDateTime.of(2024, Month.APRIL, 1, 4, 0)),
+                new AutocompleteEmailDto("hojin@domain.com", LocalDateTime.of(2024, Month.APRIL, 1, 14, 0))
         );
 
-        for (int i = 0; i < expectedEmails.size(); i++) {
-            assertEquals(expectedEmails.get(i), emailDtos.get(i).getEmail());
-        }
+        when(templateEmailRepository.findDistinctEmailsByCreatedByOrderByUpdatedAtDesc(1L))
+                .thenReturn(mockEmails);
+
+        autocompleteService = new AutocompleteService(templateEmailRepository);
     }
 
     @Test
-    void levDistance() {
-        String text = "tey3";
-        List<String> compareTextList = Arrays.asList("toy3045@website.org", "test@ji.org", "rey3");
-        Map<String, Integer> expectedResults = Map.of(
-                "toy3045@website.org", 4,
-                "test@ji.org", 2,
-                "rey3", 1
-        );
+    void testGetAutocompleteEmails_WithPrefixJi() {
+        List<AutocompleteEmailDto> result = autocompleteService.getAutocompleteEmails("ji", mockUser);
 
-        for (String compare : compareTextList) {
-            String localPart = compare.split("@")[0];
-            int count = LevenshteinDistance.levDistance(text, localPart);
-
-            assertEquals(expectedResults.get(compare), count,
-                    "Levenshtein distance for '" + text + "' vs '" + compare + "' should be " + expectedResults.get(compare));
-        }
+        assertEquals(4, result.size());
+        assertEquals("jieun@example.com", result.get(0).getEmail());
+        assertEquals("jiji@test.com", result.get(1).getEmail());
+        assertEquals("eji@website.org", result.get(2).getEmail());
+        assertEquals("hojin@domain.com", result.get(3).getEmail());
     }
+
+
+    @Test
+    void testGetAutocompleteEmails_WithNonExistentPrefix() {
+        List<AutocompleteEmailDto> result = autocompleteService.getAutocompleteEmails("xyz", mockUser);
+
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    void testGetAutocompleteEmails_WithSimilarPrefix() {
+        List<AutocompleteEmailDto> result = autocompleteService.getAutocompleteEmails("houi", mockUser);
+
+        assertEquals(1, result.size());
+        assertEquals("hojin@domain.com", result.get(0).getEmail());
+    }
+
 }
