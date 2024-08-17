@@ -4,6 +4,7 @@ import com.glerk.core.dto.IdTokenRequestDto;
 import com.glerk.core.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/v1/oauth")
 public class AuthController {
+
+    @Value("${app.cookie.secure}")
+    private boolean cookieSecure;
 
     private final UserService userService;
 
@@ -35,7 +39,7 @@ public class AuthController {
                 .httpOnly(true)
                 .maxAge(0)
                 .path("/")
-                .secure(false)
+                .secure(cookieSecure)
                 .build();
 
         SecurityContextHolder.clearContext();
@@ -49,7 +53,7 @@ public class AuthController {
                 .httpOnly(true)
                 .maxAge(7 * 24 * 3600)
                 .path("/")
-                .secure(false)
+                .secure(cookieSecure)
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
